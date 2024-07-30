@@ -25,6 +25,11 @@ const initialNodes = [
     },
 ]
 
+const nodeTypes = {
+    source: Source,
+    layer: Layer
+}
+
 let id = 0
 const getId = () => `dndnode_${id++}`
 
@@ -86,6 +91,7 @@ const DnDFlow = () => {
                     onConnect={onConnect}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
+                    nodeTypes={nodeTypes}
                     fitView
                 >
                     <Controls />
