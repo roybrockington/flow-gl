@@ -10,7 +10,8 @@ import {
     Connection,
     Panel,
     ReactFlowInstance,
-    getConnectedEdges
+    getConnectedEdges,
+    useNodesData
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -57,6 +58,7 @@ const nodeTypes = {
     source: Source,
     layer: Layer
 }
+
 
 const flowKey = 'assigntment'
 

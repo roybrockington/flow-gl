@@ -12,6 +12,7 @@ type PropertiesType = {
 }
 
 type GeoJson = {
+    id: string
     url: string
     order: number
 }
@@ -21,17 +22,17 @@ const DeckGLOverlay = (props: DeckProps) => {
     const overlay = useMemo(() => new GoogleMapsOverlay(props), [])
 
     useEffect(() => {
-        overlay.setMap(map);
-        return () => overlay.setMap(null);
+        overlay.setMap(map)
+        return () => overlay.setMap(null)
     }, [map])
 
-    overlay.setProps(props);
-    return null;
+    overlay.setProps(props)
+    return null
 }
 
 const CompiledMap = (flow: {nodes: Node[], edges: Edge[]}) => {
 
-    const [geoJson, setGeoJson] = useState<GeoJson[]>([])
+    const [geoJson, setGeoJson] = useState<GeoJson[] | null>([])
     const layerNodes = flow.nodes.filter((x: Node) => x.type == 'layer')
 
     useEffect(() => {
@@ -41,9 +42,12 @@ const CompiledMap = (flow: {nodes: Node[], edges: Edge[]}) => {
             if(source[0]?.data?.url) {
                 setGeoJson([
                     ...geoJson,
-                    {url: source[0]?.data.url, order: source[0].position.y}
+                    {
+                        id: source[0].id,
+                        url: source[0].data.url,
+                        order: source[0].position.y
+                    }
                 ])
-                console.log(source[0].data.url)
             }
         })
     }, [flow]
@@ -53,36 +57,35 @@ const CompiledMap = (flow: {nodes: Node[], edges: Edge[]}) => {
     let API_KEY = import.meta.env.VITE_REACT_API_GMAPS
 
 
-    const buildLayers = () => {
-        if (geoJson.length > 0) {
-            geoJson.map(layer =>
-                new GeoJsonLayer<PropertiesType>({
-                    id: 'GeoJsonLayer-1',
-                    data: layer.url,
+const addLayer = (dataset) => {
+        return new GeoJsonLayer<PropertiesType>({
+            id: dataset.id,
+            data: dataset.url,
 
-                    stroked: false,
-                    filled: true,
-                    pointType: 'circle+text',
-                    pickable: true,
+            stroked: false,
+            filled: true,
+            pointType: 'circle+text',
+            pickable: true,
 
-                    getFillColor: [160, 160, 180, 200],
-                    getLineColor: (f: Feature<Geometry, PropertiesType>) => {
-                        const hex = f.properties.color
-                        // convert to RGB
-                        return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0]
-                    },
-                    getText: (f: Feature<Geometry, PropertiesType>) => f.properties.name,
-                    getLineWidth: 20,
-                    getPointRadius: 4,
-                    getTextSize: 12
-                }),
-            )}
-    }
+            getFillColor: [160, 160, 180, 200],
+            getLineColor: (f: Feature<Geometry, PropertiesType>) => {
+                const hex = f.properties.color
+                // convert to RGB
+                return hex ? hex.match(/[0-9a-f]{2}/g).map(x => parseInt(x, 16)) : [0, 0, 0]
+            },
+            getText: (f: Feature<Geometry, PropertiesType>) => f.properties.name,
+            getLineWidth: 20,
+            getPointRadius: 4,
+            getTextSize: 12
+        })
+        }
 
-
-    const layers = [
-        buildLayers()
-    ]
+    const layers = geoJson.length > 0 ? [
+        geoJson.map(geo =>
+            addLayer(geo)
+            )
+    ] : []
+        
 
     return <APIProvider apiKey={API_KEY}>
         <Map
