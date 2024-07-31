@@ -9,6 +9,7 @@ import {
     useReactFlow,
     Connection,
     Panel,
+    ReactFlowInstance,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -30,7 +31,7 @@ const nodeTypes = {
     layer: Layer
 }
 
-const flowKey = 'assigntment-1'
+const flowKey = 'assigntment'
 
 let id = 0
 const getId = () => `dndnode_${id++}`
@@ -40,7 +41,7 @@ const DnDFlow = () => {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const { screenToFlowPosition, setViewport } = useReactFlow()
-    const [rfInstance, setRfInstance] = useState(null)
+    const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
 
     const onConnect = useCallback(
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -82,6 +83,7 @@ const DnDFlow = () => {
 
     const onSave = useCallback(() => {
         if (rfInstance) {
+            console.log(rfInstance)
             const flow = rfInstance.toObject()
             localStorage.setItem(flowKey, JSON.stringify(flow))
         }
@@ -89,7 +91,7 @@ const DnDFlow = () => {
 
     const onRestore = useCallback(() => {
         const restoreFlow = async () => {
-            const flow = JSON.parse(localStorage.getItem(flowKey))
+            const flow = JSON.parse(localStorage.getItem(flowKey) || '""')
 
             if (flow) {
                 const { x = 0, y = 0, zoom = 1 } = flow.viewport
@@ -102,6 +104,10 @@ const DnDFlow = () => {
         restoreFlow()
     }, [setNodes, setViewport])
 
+    const handleInit = useCallback((instance: ReactFlowInstance) => {
+        setRfInstance(instance)
+    }, [])
+
 
     return (
         <div className="dndflow">
@@ -113,7 +119,7 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onInit={setRfInstance}
+                    onInit={handleInit as any} // @todo - fix type error
                     onDrop={onDrop}
                     onDragOver={onDragOver}
                     nodeTypes={nodeTypes}
@@ -121,8 +127,8 @@ const DnDFlow = () => {
                 >
                     <Controls />
                       <Panel position="top-right">
-                        <button onClick={onSave}>save</button>
-                        <button onClick={onRestore}>restore</button>
+                        <button onClick={onSave}>Save</button>
+                        <button onClick={onRestore}>Restore</button>
                       </Panel>
                 </ReactFlow>
             </div>
