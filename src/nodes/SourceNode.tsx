@@ -10,7 +10,7 @@ export default memo(({ data, isConnectable }) => {
                     className="nodrag"
                     type="text"
                     onChange={data.onChange}
-                    defaultValue={data.source}
+                    defaultValue={data.url}
                     style={{maxWidth: 50}}
                 />
       </div>
