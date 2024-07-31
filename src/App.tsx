@@ -1,4 +1,4 @@
-import { useRef, useCallback, DragEvent } from 'react'
+import { useRef, useCallback, DragEvent, useState } from 'react'
 import {
     ReactFlow,
     ReactFlowProvider,
@@ -8,7 +8,7 @@ import {
     Controls,
     useReactFlow,
     Connection,
-    Edge,
+    Panel,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -30,6 +30,8 @@ const nodeTypes = {
     layer: Layer
 }
 
+const flowKey = 'assigntment-1'
+
 let id = 0
 const getId = () => `dndnode_${id++}`
 
@@ -37,10 +39,11 @@ const DnDFlow = () => {
     const reactFlowWrapper = useRef(null)
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
-    const { screenToFlowPosition } = useReactFlow()
+    const { screenToFlowPosition, setViewport } = useReactFlow()
+    const [rfInstance, setRfInstance] = useState(null)
 
     const onConnect = useCallback(
-        (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
+        (params: Connection) => setEdges((eds) => addEdge(params, eds)),
         [],
     )
 
@@ -60,8 +63,6 @@ const DnDFlow = () => {
                 return
             }
 
-            // project was renamed to screenToFlowPosition
-            // and you don't need to subtract the reactFlowBounds.left/top anymore
             // details: https://reactflow.dev/whats-new/2023-11-10
             const position = screenToFlowPosition({
                 x: e.clientX,
@@ -79,6 +80,29 @@ const DnDFlow = () => {
         [screenToFlowPosition],
     )
 
+    const onSave = useCallback(() => {
+        if (rfInstance) {
+            const flow = rfInstance.toObject()
+            localStorage.setItem(flowKey, JSON.stringify(flow))
+        }
+    }, [rfInstance])
+
+    const onRestore = useCallback(() => {
+        const restoreFlow = async () => {
+            const flow = JSON.parse(localStorage.getItem(flowKey))
+
+            if (flow) {
+                const { x = 0, y = 0, zoom = 1 } = flow.viewport
+                setNodes(flow.nodes || [])
+                setEdges(flow.edges || [])
+                setViewport({ x, y, zoom })
+            }
+        }
+
+        restoreFlow()
+    }, [setNodes, setViewport])
+
+
     return (
         <div className="dndflow">
             <NodeMenu />
@@ -89,12 +113,17 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
+                    onInit={setRfInstance}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
                     nodeTypes={nodeTypes}
                     fitView
                 >
                     <Controls />
+                      <Panel position="top-right">
+                        <button onClick={onSave}>save</button>
+                        <button onClick={onRestore}>restore</button>
+                      </Panel>
                 </ReactFlow>
             </div>
         </div>
