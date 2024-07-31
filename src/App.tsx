@@ -1,4 +1,4 @@
-import { useRef, useCallback, DragEvent, useState } from 'react'
+import { useRef, useCallback, DragEvent, useState, useEffect } from 'react'
 import {
     ReactFlow,
     ReactFlowProvider,
@@ -10,6 +10,7 @@ import {
     Connection,
     Panel,
     ReactFlowInstance,
+    getConnectedEdges
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -132,7 +133,6 @@ const DnDFlow = () => {
         setRfInstance(instance)
     }, [])
 
-
     return (
         <div className="dndflow">
             <NodeMenu />
@@ -160,7 +160,7 @@ const DnDFlow = () => {
                 </ReactFlow>
             </div>
             <div style={{border: '1px green solid', position: 'absolute', right: 0, top: 0, width: '50vw', height: '50vh'}}>
-                <CompiledMap nodes={nodes} />
+                <CompiledMap nodes={nodes} edges={edges} />
             </div>
         </div>
     )
