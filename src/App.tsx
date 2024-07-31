@@ -10,8 +10,6 @@ import {
     Connection,
     Panel,
     ReactFlowInstance,
-    getConnectedEdges,
-    useNodesData
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -27,33 +25,6 @@ const demoSources = [
     'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json' //points
 ]
 
-const initialNodes = [
-    {
-        id: '1',
-        type: 'source',
-        data: { url: demoSources[0] },
-        position: { x: 200, y: 5 },
-    },
-    {
-        id: '2',
-        type: 'source',
-        data: { url: demoSources[2] },
-        position: { x: 200, y: 230 },
-    },
-    {
-        id: '3',
-        type: 'layer',
-        data: {},
-        position: { x: 400, y: 5 },
-    },
-    {
-        id: '4',
-        type: 'layer',
-        data: {},
-        position: { x: 400, y: 230 },
-    },
-]
-
 const nodeTypes = {
     source: Source,
     layer: Layer
@@ -67,7 +38,7 @@ const getId = () => `dndnode_${id++}`
 
 const DnDFlow = () => {
     const reactFlowWrapper = useRef(null)
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+    const [nodes, setNodes, onNodesChange] = useNodesState([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const { screenToFlowPosition, setViewport } = useReactFlow()
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
@@ -77,6 +48,25 @@ const DnDFlow = () => {
         [],
     )
 
+    const onChange = (e: React.SyntheticEvent<HTMLFormElement>, id: string) => {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id == id) {
+            return node;
+          }
+
+          const url = e.target.value;
+
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              url,
+            },
+          };
+        }),
+      );
+    };
     const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         e.dataTransfer.dropEffect = 'move'
@@ -87,6 +77,7 @@ const DnDFlow = () => {
             e.preventDefault()
 
             const type = e.dataTransfer.getData('application/reactflow')
+            console.log(type)
 
             if (typeof type === 'undefined' || !type) {
                 return
@@ -100,7 +91,10 @@ const DnDFlow = () => {
                 id: getId(),
                 type,
                 position,
-                data: { label: `${type} node` },
+                data: { 
+                    label: `${type} node`,
+                    onChange: onChange
+                },
             }
 
             setNodes((nds) => nds.concat(newNode))
