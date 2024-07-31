@@ -16,6 +16,7 @@ import NodeMenu from './components/NodeMenu'
 import './index.css'
 import Source from './nodes/SourceNode'
 import Layer from './nodes/LayerNode'
+import Map from './components/Map'
 
 const initialNodes = [
     {
@@ -126,9 +127,12 @@ const DnDFlow = () => {
                     fitView
                 >
                     <Controls />
-                      <Panel position="top-right">
+                      <Panel position="top-left">
                         <button onClick={onSave}>Save</button>
                         <button onClick={onRestore}>Restore</button>
+                      </Panel>
+                      <Panel position="top-right">
+                        <button onClick={()=>console.log('map!')}>Map &gt;</button>
                       </Panel>
                 </ReactFlow>
             </div>
@@ -137,9 +141,12 @@ const DnDFlow = () => {
 }
 
 export default () => (
-    <div style={{width: 800, height: 800}}>
+    <div style={{display:'flex'}}>
+    <div style={{width: '50vw', border: '1px solid black'}}>
         <ReactFlowProvider>
             <DnDFlow />
         </ReactFlowProvider>
+    </div>
+        <div style={{border: '1px green solid', position: 'relative', width: '50vw', height: '50vh'}}><Map/></div>
     </div>
 )
