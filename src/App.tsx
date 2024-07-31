@@ -16,14 +16,39 @@ import NodeMenu from './components/NodeMenu'
 import './index.css'
 import Source from './nodes/SourceNode'
 import Layer from './nodes/LayerNode'
-import Map from './components/Map'
+import CompiledMap from './components/Map'
+
+const demoSources = [
+    'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/san-francisco.geojson', // multipolygon
+    'https://raw.githubusercontent.com/dwillis/nyc-maps/master/boroughs.geojson', // multipolygon
+    'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/chicago.geojson', // multipolygon
+    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json' //points
+]
 
 const initialNodes = [
     {
         id: '1',
         type: 'source',
-        data: { label: 'source node' },
-        position: { x: 250, y: 5 },
+        data: { url: demoSources[0] },
+        position: { x: 200, y: 5 },
+    },
+    {
+        id: '2',
+        type: 'source',
+        data: { url: demoSources[2] },
+        position: { x: 200, y: 230 },
+    },
+    {
+        id: '3',
+        type: 'layer',
+        data: {},
+        position: { x: 400, y: 5 },
+    },
+    {
+        id: '4',
+        type: 'layer',
+        data: {},
+        position: { x: 400, y: 230 },
     },
 ]
 
@@ -60,12 +85,10 @@ const DnDFlow = () => {
 
             const type = e.dataTransfer.getData('application/reactflow')
 
-            // check if the dropped element is valid
             if (typeof type === 'undefined' || !type) {
                 return
             }
 
-            // details: https://reactflow.dev/whats-new/2023-11-10
             const position = screenToFlowPosition({
                 x: e.clientX,
                 y: e.clientY,
@@ -127,14 +150,17 @@ const DnDFlow = () => {
                     fitView
                 >
                     <Controls />
-                      <Panel position="top-left">
+                    <Panel position="top-left">
                         <button onClick={onSave}>Save</button>
                         <button onClick={onRestore}>Restore</button>
-                      </Panel>
-                      <Panel position="top-right">
+                    </Panel>
+                    <Panel position="top-right">
                         <button onClick={()=>console.log('map!')}>Map &gt;</button>
-                      </Panel>
+                    </Panel>
                 </ReactFlow>
+            </div>
+            <div style={{border: '1px green solid', position: 'absolute', right: 0, top: 0, width: '50vw', height: '50vh'}}>
+                <CompiledMap nodes={nodes} />
             </div>
         </div>
     )
@@ -142,11 +168,10 @@ const DnDFlow = () => {
 
 export default () => (
     <div style={{display:'flex'}}>
-    <div style={{width: '50vw', border: '1px solid black'}}>
-        <ReactFlowProvider>
-            <DnDFlow />
-        </ReactFlowProvider>
-    </div>
-        <div style={{border: '1px green solid', position: 'relative', width: '50vw', height: '50vh'}}><Map/></div>
+        <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
+            <ReactFlowProvider>
+                <DnDFlow />
+            </ReactFlowProvider>
+        </div>
     </div>
 )
