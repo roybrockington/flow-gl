@@ -44,10 +44,10 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
             pickable: true,
 
             getFillColor: [160, 160, 180, 200],
-            getLineColor: (f: Feature<Geometry, PropertiesType>) => {
+            getLineColor: (f: Feature<Geometry, PropertiesType> | any) => {
                 const hex = f.properties.color
                 // convert to RGB
-                return hex ? hex?.match(/[0-9a-f]{2}/g)?.map(x => parseInt(x, 16)) : [0, 0, 0]
+                return hex ? hex?.match(/[0-9a-f]{2}/g)?.map((x: string) => parseInt(x, 16)) : [0, 0, 0]
             },
             getText: (f: Feature<Geometry, PropertiesType>) => f.properties.name,
             getLineWidth: 20,
@@ -78,7 +78,7 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
                 layers={layers} 
                 controller
                 getTooltip={
-                    ({object}: PickingInfo<Feature<Geometry, PropertiesType>>) => object && object.properties.name
+                    ({object}: PickingInfo<Feature<Geometry, PropertiesType>> | any) => object && object.properties.name
                 }
             />
             <div

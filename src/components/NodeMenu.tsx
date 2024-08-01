@@ -5,8 +5,8 @@ const NodeMenu = () => {
   }
 
     return (
-        <aside style={{display:'flex', flexDirection:'column', gap: 6, alignItems: 'center'}}>
-            <div onDragStart={(event) => onDragStart(event, 'source')} draggable style={{borderRadius: 10, padding: 20, border: '1px solid black', minHeight: 60, maxWidth: 60}}>
+        <aside style={{display:'flex', flexDirection:'column', gap: 8, alignItems: 'center'}}>
+            <div onDragStart={(event) => onDragStart(event, 'source')} draggable style={{borderRadius: 10, padding: 20, border: '1px solid black', minHeight: 60, maxWidth: 60, display:'flex', flexDirection: 'column', gap:10}}> 
                 <div>
                     Source
                 </div>

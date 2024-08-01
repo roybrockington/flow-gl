@@ -13,11 +13,10 @@ import {
     Node,
     getOutgoers,
 } from '@xyflow/react'
-import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
-import './index.css'
 import CompiledMap from './components/CompiledMap'
 import { nodeTypes } from './nodes'
+import '@xyflow/react/dist/style.css'
 
 const flowKey = 'assignment'
 
@@ -129,7 +128,7 @@ const DnDFlow = () => {
     return (
         <div className="dndflow">
             <div style={{display: showMap ? '' : 'none', border: '1px green solid', position: 'absolute', left: '25%', top: '10%', width: '50vw', height: '80vh'}}>
-                <CompiledMap mapLayers={mapLayers} setMapLayers={setMapLayers} showMap={showMap} setShowMap={setShowMap} />
+                <CompiledMap mapLayers={mapLayers} setMapLayers={setMapLayers} setShowMap={setShowMap} />
             </div>
             <NodeMenu />
             <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{display : showMap ? 'none' : ''}}>
@@ -139,7 +138,7 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onInit={handleInit}
+                    onInit={handleInit as any}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
                     nodeTypes={nodeTypes}

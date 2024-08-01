@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Handle, Position } from '@xyflow/react'
 
-export default memo(({ data, isConnectable }) => {
+export default memo(({ isConnectable }: {isConnectable: boolean}) => {
   return (
     <>
       <div style={{borderRadius: 10, padding: 20, border: '1px solid black', minHeight: 60}}>
