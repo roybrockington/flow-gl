@@ -5,6 +5,7 @@ import { DeckProps, PickingInfo } from '@deck.gl/core'
 import { GoogleMapsOverlay } from '@deck.gl/google-maps'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { GeoJson } from '../App'
+import { Node } from '@xyflow/react'
 
 type PropertiesType = {
     name: string
@@ -26,15 +27,14 @@ const DeckGLOverlay = (props: DeckProps) => {
 
 const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {mapLayers: GeoJson[], setMapLayers: Dispatch<SetStateAction<GeoJson>>, setShowMap: Dispatch<SetStateAction<boolean>>}) => {
 
-
     let MAP_ID = '7f459e2f2195760'
     let API_KEY = import.meta.env.VITE_REACT_API_GMAPS
 
 
-    const addLayer = (dataset: GeoJson) => {
+    const addLayer = (dataset: Node) => {
         return new GeoJsonLayer<PropertiesType>({
             id: dataset.id,
-            data: dataset.url,
+            data: dataset.data.url,
 
             stroked: false,
             filled: true,
@@ -55,8 +55,8 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {mapLayers: GeoJson[
     }
 
     const layers = mapLayers.length > 0 ? [
-        mapLayers.map(geo =>
-            addLayer(geo)
+        mapLayers.map(layer =>
+            addLayer(layer)
         )
     ] : []
 
