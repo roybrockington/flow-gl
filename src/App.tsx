@@ -121,7 +121,6 @@ const DnDFlow = () => {
         let sorted = sources.sort((b,a) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
 
         setMapLayers(sorted)
-
         setShowMap(true)
     }
 
