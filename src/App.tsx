@@ -1,4 +1,4 @@
-import { useRef, useCallback, DragEvent, useState, useEffect } from 'react'
+import { useRef, useCallback, DragEvent, useState, ChangeEvent } from 'react'
 import {
     ReactFlow,
     ReactFlowProvider,
@@ -10,28 +10,14 @@ import {
     Connection,
     Panel,
     ReactFlowInstance,
-    getIncomers,
     Node,
     getOutgoers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
 import './index.css'
-import Source from './nodes/SourceNode'
-import Layer from './nodes/LayerNode'
-import CompiledMap from './components/Map'
-
-const nodeTypes = {
-    source: Source,
-    layer: Layer
-}
-
-export type GeoJson = {
-    id: string
-    url: string
-    order: number
-}
-
+import CompiledMap from './components/CompiledMap'
+import { nodeTypes } from './nodes'
 
 const flowKey = 'assignment'
 
@@ -39,35 +25,9 @@ let id = 0
 const getId = () => `dndnode_${id++}`
 
 
-const initialNodes = [
-    {
-        id: getId(),
-        type: 'source',
-        data: { label: 'source node', url: 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/san-francisco.geojson'},
-        position: { x: 50, y: 5 },
-    },
-    {
-        id: getId(),
-        type: 'source',
-        data: { label: 'source node', url: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json'},
-        position: { x: 50, y: 145 },
-    },
-    {
-        id: getId(),
-        type: 'layer',
-        data: {},
-        position: { x: 250, y: 5 },
-    },
-    {
-        id: getId(),
-        type: 'layer',
-        data: {},
-        position: { x: 250, y: 145 },
-    },]
-
 const DnDFlow = () => {
     const reactFlowWrapper = useRef(null)
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node>([])
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const { screenToFlowPosition, setViewport } = useReactFlow()
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
@@ -79,9 +39,9 @@ const DnDFlow = () => {
         [],
     )
 
-    const onChange = (e) => {
-        setNodes((nds) =>
-            nds.map((node: Node) => {
+    const onChange = (e:ChangeEvent<HTMLInputElement>) => {
+        setNodes((nodes) =>
+            nodes.map((node) => {
                 if (node.id !== e.target.id) {
                     return node
                 }
@@ -89,9 +49,10 @@ const DnDFlow = () => {
                 const url = e.target.value
 
                 return {...node, data: {...node.data, url}}
-            }),
+            })
         )
     }
+
     const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         e.dataTransfer.dropEffect = 'move'
@@ -153,12 +114,12 @@ const DnDFlow = () => {
     }, [])
 
 
-    const toggleMap = () => {
+    const launchMap = () => {
         let sources = nodes.filter((x: Node) => 
             x.type == 'source' && x.data.url !== '' && getOutgoers(x, nodes, edges).length == 1
         )
 
-        let sorted = sources.sort((a,b) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
+        let sorted = sources.sort((b,a) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
 
         setMapLayers(sorted)
 
@@ -168,7 +129,7 @@ const DnDFlow = () => {
     return (
         <div className="dndflow">
             <div style={{display: showMap ? '' : 'none', border: '1px green solid', position: 'absolute', left: '25%', top: '10%', width: '50vw', height: '80vh'}}>
-                <CompiledMap nodes={nodes} mapLayers={mapLayers} setMapLayers={setMapLayers} showMap={showMap} setShowMap={setShowMap} />
+                <CompiledMap mapLayers={mapLayers} setMapLayers={setMapLayers} showMap={showMap} setShowMap={setShowMap} />
             </div>
             <NodeMenu />
             <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{display : showMap ? 'none' : ''}}>
@@ -178,11 +139,10 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onInit={handleInit as any} // @todo - fix type error
+                    onInit={handleInit}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
                     nodeTypes={nodeTypes}
-                    fitView
                 >
                     <Controls />
                     <Panel position="top-left">
@@ -190,9 +150,7 @@ const DnDFlow = () => {
                         <button onClick={onRestore}>Restore</button>
                     </Panel>
                     <Panel position="top-right">
-                        <button onClick={toggleMap}>Map &gt;</button>
-                        <button onClick={()=>console.log(mapLayers)}>state layers</button>
-                        <button onClick={()=>console.log(nodes.filter(x=> x.type === 'layer'))}>layers</button>
+                        <button onClick={launchMap}>Map &gt;</button>
                     </Panel>
                 </ReactFlow>
             </div>
