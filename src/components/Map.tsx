@@ -3,18 +3,13 @@ import type { Feature, Geometry } from 'geojson'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import { DeckProps, PickingInfo } from '@deck.gl/core'
 import { GoogleMapsOverlay } from '@deck.gl/google-maps'
-import { useEffect, useMemo, useState } from 'react'
+import { SetStateAction, useEffect, useMemo, useState } from 'react'
 import { Edge, getIncomers, Node } from '@xyflow/react'
+import { GeoJson } from '../App'
 
 type PropertiesType = {
     name: string
     color: string
-}
-
-type GeoJson = {
-    id: string
-    url: string
-    order: number
 }
 
 const DeckGLOverlay = (props: DeckProps) => {
@@ -30,34 +25,14 @@ const DeckGLOverlay = (props: DeckProps) => {
     return null
 }
 
-const CompiledMap = (flow: {nodes: Node[], edges: Edge[]}) => {
+const CompiledMap = ({mapLayers, setShowMap}: {layers: GeoJson[], setShowMap: SetStateAction<boolean>}) => {
 
-    const [geoJson, setGeoJson] = useState<GeoJson[] | null>([])
-    const layerNodes = flow.nodes.filter((x: Node) => x.type == 'layer')
-
-    useEffect(() => {
-        setGeoJson([])
-        layerNodes.forEach(layer => {
-            const source = (getIncomers(layer, flow.nodes, flow.edges))
-            if(source[0]?.data?.url) {
-                setGeoJson([
-                    ...geoJson,
-                    {
-                        id: source[0].id,
-                        url: source[0].data.url,
-                        order: source[0].position.y
-                    }
-                ])
-            }
-        })
-    }, [flow]
-    )
 
     let MAP_ID = '7f459e2f2195760'
     let API_KEY = import.meta.env.VITE_REACT_API_GMAPS
 
 
-const addLayer = (dataset) => {
+    const addLayer = (dataset) => {
         return new GeoJsonLayer<PropertiesType>({
             id: dataset.id,
             data: dataset.url,
@@ -78,14 +53,19 @@ const addLayer = (dataset) => {
             getPointRadius: 4,
             getTextSize: 12
         })
-        }
+    }
 
-    const layers = geoJson.length > 0 ? [
-        geoJson.map(geo =>
+    const layers = mapLayers.length > 0 ? [
+        mapLayers.map(geo =>
             addLayer(geo)
-            )
+        )
     ] : []
-        
+
+    const clearMap = () => {
+        setGeoJson([])
+        setShowMap(false)
+    }
+
 
     return <APIProvider apiKey={API_KEY}>
         <Map
@@ -99,8 +79,8 @@ const addLayer = (dataset) => {
                 getTooltip={({object}: PickingInfo<Feature<Geometry, PropertiesType>>) => object && object.properties.name}
             />
             <button 
-                style={{ position:'absolute', top:10, right:4 }}
-                onClick={() => console.log(geoJson)}
+                style={{ position:'absolute', top:10, right:8 }}
+                onClick={() => setShowMap()}
             >Back &gt;</button>
         </Map>
     </APIProvider>

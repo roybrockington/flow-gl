@@ -10,6 +10,7 @@ import {
     Connection,
     Panel,
     ReactFlowInstance,
+    getIncomers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -18,20 +19,18 @@ import Source from './nodes/SourceNode'
 import Layer from './nodes/LayerNode'
 import CompiledMap from './components/Map'
 
-const demoSources = [
-    'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/san-francisco.geojson', // multipolygon
-    'https://raw.githubusercontent.com/dwillis/nyc-maps/master/boroughs.geojson', // multipolygon
-    'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/chicago.geojson', // multipolygon
-    'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json' //points
-]
-
 const nodeTypes = {
     source: Source,
     layer: Layer
 }
 
+export type GeoJson = {
+    id: string
+    url: string
+    order: number
+}
 
-const flowKey = 'assigntment'
+const flowKey = 'assignment'
 
 let id = 0
 const getId = () => `dndnode_${id++}`
@@ -42,6 +41,8 @@ const DnDFlow = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const { screenToFlowPosition, setViewport } = useReactFlow()
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
+    const [showMap, setShowMap] = useState(false)
+    const [mapLayers, setMapLayers] = useState<GeoJson[] | null>([])
 
     const onConnect = useCallback(
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
@@ -52,7 +53,7 @@ const DnDFlow = () => {
       setNodes((nds) =>
         nds.map((node) => {
           if (node.id == id) {
-            return node;
+            return node
           }
 
           const url = e.target.value;
@@ -63,10 +64,10 @@ const DnDFlow = () => {
               ...node.data,
               url,
             },
-          };
+          }
         }),
-      );
-    };
+      )
+    }
     const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
         e.dataTransfer.dropEffect = 'move'
@@ -129,10 +130,32 @@ const DnDFlow = () => {
         setRfInstance(instance)
     }, [])
 
+    const toggleMap = () => {
+        let layerNodes = nodes.filter((x: Node) => x.type == 'layer')
+        layerNodes.forEach(layer => {
+            const source = (getIncomers(layer, nodes, edges))
+            if(source[0]?.data?.url) {
+                setMapLayers([
+                    ...mapLayers,
+                    {
+                        id: source[0].id,
+                        url: source[0].data.url,
+                        order: source[0].position.y
+                    }
+                ])
+            }
+        })
+        setShowMap(true)
+    }
+
+
     return (
         <div className="dndflow">
+            <div style={{display: showMap ? '' : 'none', border: '1px green solid', position: 'absolute', left: '25%', top: '10%', width: '50vw', height: '80vh'}}>
+                <CompiledMap mapLayers={mapLayers} showMap={showMap} setShowMap={setShowMap} />
+            </div>
             <NodeMenu />
-            <div className="reactflow-wrapper" ref={reactFlowWrapper}>
+            <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{display : showMap ? 'none' : ''}}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -151,23 +174,18 @@ const DnDFlow = () => {
                         <button onClick={onRestore}>Restore</button>
                     </Panel>
                     <Panel position="top-right">
-                        <button onClick={()=>console.log('map!')}>Map &gt;</button>
+                        <button onClick={toggleMap}>Map &gt;</button>
                     </Panel>
                 </ReactFlow>
-            </div>
-            <div style={{border: '1px green solid', position: 'absolute', right: 0, top: 0, width: '50vw', height: '50vh'}}>
-                <CompiledMap nodes={nodes} edges={edges} />
             </div>
         </div>
     )
 }
 
 export default () => (
-    <div style={{display:'flex'}}>
         <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
             <ReactFlowProvider>
                 <DnDFlow />
             </ReactFlowProvider>
         </div>
-    </div>
 )
