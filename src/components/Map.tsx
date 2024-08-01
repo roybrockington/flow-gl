@@ -3,8 +3,7 @@ import type { Feature, Geometry } from 'geojson'
 import { APIProvider, Map, useMap } from '@vis.gl/react-google-maps'
 import { DeckProps, PickingInfo } from '@deck.gl/core'
 import { GoogleMapsOverlay } from '@deck.gl/google-maps'
-import { SetStateAction, useEffect, useMemo, useState } from 'react'
-import { Edge, getIncomers, Node } from '@xyflow/react'
+import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { GeoJson } from '../App'
 
 type PropertiesType = {
@@ -25,14 +24,14 @@ const DeckGLOverlay = (props: DeckProps) => {
     return null
 }
 
-const CompiledMap = ({mapLayers, setShowMap}: {layers: GeoJson[], setShowMap: SetStateAction<boolean>}) => {
+const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {mapLayers: GeoJson[], setMapLayers: Dispatch<SetStateAction<GeoJson>>, setShowMap: Dispatch<SetStateAction<boolean>>}) => {
 
 
     let MAP_ID = '7f459e2f2195760'
     let API_KEY = import.meta.env.VITE_REACT_API_GMAPS
 
 
-    const addLayer = (dataset) => {
+    const addLayer = (dataset: GeoJson) => {
         return new GeoJsonLayer<PropertiesType>({
             id: dataset.id,
             data: dataset.url,
@@ -62,7 +61,7 @@ const CompiledMap = ({mapLayers, setShowMap}: {layers: GeoJson[], setShowMap: Se
     ] : []
 
     const clearMap = () => {
-        setGeoJson([])
+        setMapLayers([])
         setShowMap(false)
     }
 
@@ -78,10 +77,16 @@ const CompiledMap = ({mapLayers, setShowMap}: {layers: GeoJson[], setShowMap: Se
                 controller
                 getTooltip={({object}: PickingInfo<Feature<Geometry, PropertiesType>>) => object && object.properties.name}
             />
-            <button 
+            <div
                 style={{ position:'absolute', top:10, right:8 }}
-                onClick={() => setShowMap()}
+                >
+            <button 
+                onClick={() => clearMap()}
             >Back &gt;</button>
+            <button 
+                onClick={()=>console.log(mapLayers)}
+            >Dump Layers</button>
+            </div>
         </Map>
     </APIProvider>
 }

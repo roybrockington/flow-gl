@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Handle, Position } from '@xyflow/react'
 
-export default memo(({ data, isConnectable }) => {
+export default memo(({ id, data, isConnectable }) => {
 
     return (
 
@@ -11,6 +11,7 @@ export default memo(({ data, isConnectable }) => {
                 <input
                     className="nodrag"
                     type="text"
+                    id={id}
                     onChange={data.onChange}
                     defaultValue={data.url}
                     style={{maxWidth: 50}}

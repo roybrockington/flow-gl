@@ -11,6 +11,8 @@ import {
     Panel,
     ReactFlowInstance,
     getIncomers,
+    Node,
+    getOutgoers,
 } from '@xyflow/react'
 import '@xyflow/react/dist/style.css'
 import NodeMenu from './components/NodeMenu'
@@ -30,43 +32,65 @@ export type GeoJson = {
     order: number
 }
 
+
 const flowKey = 'assignment'
 
 let id = 0
 const getId = () => `dndnode_${id++}`
 
+
+const initialNodes = [
+    {
+        id: getId(),
+        type: 'source',
+        data: { label: 'source node', url: 'https://raw.githubusercontent.com/codeforamerica/click_that_hood/master/public/data/san-francisco.geojson'},
+        position: { x: 50, y: 5 },
+    },
+    {
+        id: getId(),
+        type: 'source',
+        data: { label: 'source node', url: 'https://raw.githubusercontent.com/visgl/deck.gl-data/master/website/bart.geo.json'},
+        position: { x: 50, y: 145 },
+    },
+    {
+        id: getId(),
+        type: 'layer',
+        data: {},
+        position: { x: 250, y: 5 },
+    },
+    {
+        id: getId(),
+        type: 'layer',
+        data: {},
+        position: { x: 250, y: 145 },
+    },]
+
 const DnDFlow = () => {
     const reactFlowWrapper = useRef(null)
-    const [nodes, setNodes, onNodesChange] = useNodesState([])
+    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
     const [edges, setEdges, onEdgesChange] = useEdgesState([])
     const { screenToFlowPosition, setViewport } = useReactFlow()
     const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null)
     const [showMap, setShowMap] = useState(false)
-    const [mapLayers, setMapLayers] = useState<GeoJson[] | null>([])
+    const [mapLayers, setMapLayers] = useState<Node[]>([])
 
     const onConnect = useCallback(
         (params: Connection) => setEdges((eds) => addEdge(params, eds)),
         [],
     )
 
-    const onChange = (e: React.SyntheticEvent<HTMLFormElement>, id: string) => {
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id == id) {
-            return node
-          }
+    const onChange = (e) => {
+        setNodes((nds) =>
+            nds.map((node: Node) => {
+                if (node.id !== e.target.id) {
+                    return node
+                }
 
-          const url = e.target.value;
+                const url = e.target.value
 
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              url,
-            },
-          }
-        }),
-      )
+                return {...node, data: {...node.data, url}}
+            }),
+        )
     }
     const onDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
         e.preventDefault()
@@ -78,7 +102,6 @@ const DnDFlow = () => {
             e.preventDefault()
 
             const type = e.dataTransfer.getData('application/reactflow')
-            console.log(type)
 
             if (typeof type === 'undefined' || !type) {
                 return
@@ -105,7 +128,6 @@ const DnDFlow = () => {
 
     const onSave = useCallback(() => {
         if (rfInstance) {
-            console.log(rfInstance)
             const flow = rfInstance.toObject()
             localStorage.setItem(flowKey, JSON.stringify(flow))
         }
@@ -130,29 +152,23 @@ const DnDFlow = () => {
         setRfInstance(instance)
     }, [])
 
+
     const toggleMap = () => {
-        let layerNodes = nodes.filter((x: Node) => x.type == 'layer')
-        layerNodes.forEach(layer => {
-            const source = (getIncomers(layer, nodes, edges))
-            if(source[0]?.data?.url) {
-                setMapLayers([
-                    ...mapLayers,
-                    {
-                        id: source[0].id,
-                        url: source[0].data.url,
-                        order: source[0].position.y
-                    }
-                ])
-            }
-        })
+        let sources = nodes.filter((x: Node) => 
+            x.type == 'source' && x.data.url !== '' && getOutgoers(x, nodes, edges).length == 1
+        )
+
+        let sorted = sources.sort((a,b) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
+
+        setMapLayers(sorted)
+
         setShowMap(true)
     }
-
 
     return (
         <div className="dndflow">
             <div style={{display: showMap ? '' : 'none', border: '1px green solid', position: 'absolute', left: '25%', top: '10%', width: '50vw', height: '80vh'}}>
-                <CompiledMap mapLayers={mapLayers} showMap={showMap} setShowMap={setShowMap} />
+                <CompiledMap nodes={nodes} mapLayers={mapLayers} setMapLayers={setMapLayers} showMap={showMap} setShowMap={setShowMap} />
             </div>
             <NodeMenu />
             <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{display : showMap ? 'none' : ''}}>
@@ -175,6 +191,8 @@ const DnDFlow = () => {
                     </Panel>
                     <Panel position="top-right">
                         <button onClick={toggleMap}>Map &gt;</button>
+                        <button onClick={()=>console.log(mapLayers)}>state layers</button>
+                        <button onClick={()=>console.log(nodes.filter(x=> x.type === 'layer'))}>layers</button>
                     </Panel>
                 </ReactFlow>
             </div>
@@ -183,9 +201,9 @@ const DnDFlow = () => {
 }
 
 export default () => (
-        <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
-            <ReactFlowProvider>
-                <DnDFlow />
-            </ReactFlowProvider>
-        </div>
+    <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
+        <ReactFlowProvider>
+            <DnDFlow />
+        </ReactFlowProvider>
+    </div>
 )
