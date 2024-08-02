@@ -108,11 +108,6 @@ const DnDFlow = () => {
         restoreFlow()
     }, [setNodes, setViewport])
 
-    const handleInit = useCallback((instance: ReactFlowInstance) => {
-        setRfInstance(instance)
-    }, [])
-
-
     const launchMap = () => {
         let sources = nodes.filter((x: Node) => 
             x.type == 'source' && x.data.url !== '' && getOutgoers(x, nodes, edges).length == 1
@@ -137,7 +132,7 @@ const DnDFlow = () => {
                     onNodesChange={onNodesChange}
                     onEdgesChange={onEdgesChange}
                     onConnect={onConnect}
-                    onInit={handleInit as any}
+                    onInit={setRfInstance as any}
                     onDrop={onDrop}
                     onDragOver={onDragOver}
                     nodeTypes={nodeTypes}
@@ -157,9 +152,9 @@ const DnDFlow = () => {
 }
 
 export default () => (
-    <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
         <ReactFlowProvider>
+        <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
             <DnDFlow />
+        </div>
         </ReactFlowProvider>
-    </div>
 )
