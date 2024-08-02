@@ -2,7 +2,7 @@
 
 ReactFlow application featuring custom nodes and map visualisation with DeckGL.
 
-Enter a GeoJSON URL into a source node and connect to a layer node to render the data on the map. Higher placed layer nodes are rendered on top of lower ones.
+Enter a GeoJSON URL into a source node and connect to a layer node to render the data on the map. Higher-placed layer nodes are rendered on top of lower ones.
 
 ## Technologies Used
 
