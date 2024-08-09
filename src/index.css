@@ -57,6 +57,16 @@
         margin-top: 10px;
     }
 
+    .hidden {
+        display: none;
+    }
+
+    .flow-container {
+        width: 50vw;
+        height: 80vh;
+        border: 1px solid black;
+    }
+
     @media screen and (min-width: 768px) {
         .dndflow {
             flex-direction: row;

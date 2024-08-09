@@ -45,8 +45,7 @@ const NodeMenu = () => {
                     label="URL"
                     className="nodrag"
                     type="text"
-                    sx={{bgcolor: 'white', width: 1, position: 'relative'}}
-                    value=""
+                    sx={{bgcolor: 'white', width: 1}}
                 />
             </Box>
             <Box

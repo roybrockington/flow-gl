@@ -70,7 +70,6 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
         setShowMap(false)
     }
 
-
     return <APIProvider apiKey={API_KEY}>
         <Map
             defaultCenter={{lat: 34.74, lng: -122.4}}
@@ -84,17 +83,14 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
                     ({object}: PickingInfo<Feature<Geometry, PropertiesType>> | any) => object && object.properties.name
                 }
             />
-            <div
-                style={{ position:'absolute', top:10, right:80 }}
-            >
                 <Button
                     variant='contained'
                     onClick={() => clearMap()}
+                    sx={{position: 'absolute', top: 12, right: 80}}
                 >
                     <ArrowBack sx={{marginRight: 1}} />
                     Back
                 </Button>
-            </div>
         </Map>
     </APIProvider>
 }

@@ -17,7 +17,7 @@ import NodeMenu from './components/NodeMenu'
 import CompiledMap from './components/CompiledMap'
 import { nodeTypes } from './nodes'
 import '@xyflow/react/dist/style.css'
-import { Button } from '@mui/material'
+import { Button, Container } from '@mui/material'
 import MapIcon from '@mui/icons-material/Map'
 import SaveIcon from '@mui/icons-material/Save'
 import RestartAltIcon from '@mui/icons-material/RestartAlt'
@@ -125,11 +125,11 @@ const DnDFlow = () => {
 
     return (
         <div className="dndflow">
-            <div style={{display: showMap ? '' : 'none', border: '1px green solid', position: 'absolute', left: '25%', top: '10%', width: '50vw', height: '80vh'}}>
+            <Container fixed sx={{display: showMap ? '' : 'none', position: 'absolute', left: '25%', top: '10%', width: 0.5, height: '80vh', zIndex: 999}}>
                 <CompiledMap mapLayers={mapLayers} setMapLayers={setMapLayers} setShowMap={setShowMap} />
-            </div>
+            </Container>
             <NodeMenu />
-            <div className="reactflow-wrapper" ref={reactFlowWrapper} style={{display : showMap ? 'none' : ''}}>
+            <div className={`${showMap ? 'hidden' : ''} reactflow-wrapper`} ref={reactFlowWrapper}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -163,7 +163,7 @@ const DnDFlow = () => {
 
 export default () => (
         <ReactFlowProvider>
-        <div style={{width: '50vw', height: '80vh', border: '1px solid black'}}>
+        <div className='flow-container'>
             <DnDFlow />
         </div>
         </ReactFlowProvider>
