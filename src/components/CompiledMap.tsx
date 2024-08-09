@@ -30,8 +30,8 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
     setShowMap: Dispatch<SetStateAction<boolean>>
 }) => {
 
-    let MAP_ID = '7f459e2f2195760'
-    let API_KEY = import.meta.env.VITE_REACT_API_GMAPS
+    const MAP_ID = '7f459e2f2195760'
+    const API_KEY = import.meta.env.VITE_REACT_API_GMAPS
 
     const addLayer = (dataset: Node) => {
         return new GeoJsonLayer<PropertiesType>({

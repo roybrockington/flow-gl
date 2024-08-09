@@ -109,11 +109,11 @@ const DnDFlow = () => {
     }, [setNodes, setViewport])
 
     const launchMap = () => {
-        let sources = nodes.filter((x: Node) => 
+        const sources = nodes.filter((x: Node) => 
             x.type == 'source' && x.data.url !== '' && getOutgoers(x, nodes, edges).length == 1
         )
 
-        let sorted = sources.sort((b,a) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
+        const sorted = sources.sort((b,a) => getOutgoers(a, nodes, edges)[0].position.y - getOutgoers(b, nodes, edges)[0].position.y)
 
         setMapLayers(sorted)
         setShowMap(true)
