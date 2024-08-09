@@ -5,6 +5,9 @@ import { DeckProps, PickingInfo } from '@deck.gl/core'
 import { GoogleMapsOverlay } from '@deck.gl/google-maps'
 import { Dispatch, SetStateAction, useEffect, useMemo } from 'react'
 import { Node } from '@xyflow/react'
+import { Button } from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { ArrowBack } from '@mui/icons-material'
 
 type PropertiesType = {
     name: string
@@ -84,9 +87,13 @@ const CompiledMap = ({mapLayers, setMapLayers, setShowMap}: {
             <div
                 style={{ position:'absolute', top:10, right:80 }}
             >
-                <button 
+                <Button
+                    variant='contained'
                     onClick={() => clearMap()}
-                >Back &gt;</button>
+                >
+                    <ArrowBack sx={{marginRight: 1}} />
+                    Back
+                </Button>
             </div>
         </Map>
     </APIProvider>

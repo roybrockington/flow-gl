@@ -17,6 +17,10 @@ import NodeMenu from './components/NodeMenu'
 import CompiledMap from './components/CompiledMap'
 import { nodeTypes } from './nodes'
 import '@xyflow/react/dist/style.css'
+import { Button } from '@mui/material'
+import MapIcon from '@mui/icons-material/Map'
+import SaveIcon from '@mui/icons-material/Save'
+import RestartAltIcon from '@mui/icons-material/RestartAlt'
 
 const flowKey = 'assignment'
 
@@ -139,11 +143,17 @@ const DnDFlow = () => {
                 >
                     <Controls />
                     <Panel position="top-left">
-                        <button onClick={onSave}>Save</button>
-                        <button onClick={onRestore}>Restore</button>
+                        <Button variant="contained" color="info" onClick={onSave} sx={{marginRight: 2}}>
+                            Save
+                            <SaveIcon sx={{marginLeft: 1}}/>
+                        </Button>
+                        <Button variant="outlined" color="info" onClick={onRestore}>
+                            Restore
+                            <RestartAltIcon sx={{marginLeft: 1}}/>
+                        </Button>
                     </Panel>
                     <Panel position="top-right">
-                        <button onClick={launchMap}>Map &gt;</button>
+                        <Button variant="contained" color="success" onClick={launchMap}>Map<MapIcon sx={{marginLeft: 1}} /></Button>
                     </Panel>
                 </ReactFlow>
             </div>
